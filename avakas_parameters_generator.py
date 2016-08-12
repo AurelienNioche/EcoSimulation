@@ -31,7 +31,7 @@ class ParametersGenerator(object):
 
         self.folders = OrderedDict(
             [
-                ("macro", "server"),
+                ("macro", "avakas_simulation_template"),
                 ("scripts", "../avakas_scripts"),
                 ("parameters", "../avakas_input_parameters"),
                 ("logs", "../avakas_logs"),
