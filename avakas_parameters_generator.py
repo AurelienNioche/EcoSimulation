@@ -200,7 +200,7 @@ class ParametersGenerator(object):
 
         print("Create scripts...")
 
-        root_file = "{}/simulation-template.sh".format(self.folders["macro"])
+        root_file = "{}/simulation_template.sh".format(self.folders["macro"])
         prefix_output_file = "{}/eco-simulation_".format(self.folders["scripts"])
 
         for i in range(self.nb_sub_list):
