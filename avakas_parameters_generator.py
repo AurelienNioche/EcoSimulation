@@ -102,7 +102,6 @@ class ParametersGenerator(object):
 
         idx = 0
         parameters_list = []
-        suffixes_list = []
 
         for workforce in workforce_list:
             for alpha in self.alpha_list:
@@ -124,7 +123,7 @@ class ParametersGenerator(object):
 
                                 }
                             parameters_list.append(parameters)
-                            suffixes_list.append("{date}_idx{idx}".format(date=self.date, idx=idx))
+                            idx += 1  # increment idx
 
                         else:
 
