@@ -19,6 +19,8 @@ class ParametersGenerator(object):
         self.t_max = 1000
 
         self.alpha_list = np.arange(0.1, 1, 0.1)
+
+        # Be careful in choosing of 'overflow' in exp computation
         self.tau_list = np.arange(0.01, 0.1, 0.01)
         self.epsilon_list = np.arange(0, 0.9, 1)
         self.q_information_list = np.arange(0, 1, 0.1)
