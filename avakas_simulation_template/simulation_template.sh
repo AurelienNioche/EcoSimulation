@@ -52,5 +52,7 @@ echo main.py ~/aurelien/EcoSimulation-master/avakas_input_parameters/slice_0.p
 # launch python script with pickle object for parameters
 python main.py ~/aurelien/EcoSimulation-master/avakas_input_parameters/slice_0.p
 
-# all done
+echo "#############################"
+echo "Date:" `date`
 echo "Job finished"
+echo "#############################"

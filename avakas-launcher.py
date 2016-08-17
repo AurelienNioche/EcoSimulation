@@ -1,5 +1,6 @@
 import subprocess
 import json
+import sys
 from os import listdir
 from os.path import isfile, join
 
@@ -54,6 +55,10 @@ class AvakasLauncher(object):
 
 
 def main():
+
+    if sys.version_info[0] != 2:
+        raise Exception("Should use Python 2 for launching jobs on Avakas. \n"
+                        "Maybe what you want is using avakas-launcher.SH")
 
     avakas_launcher = AvakasLauncher()
     avakas_launcher.run()

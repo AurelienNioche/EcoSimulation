@@ -18,12 +18,12 @@ class ParametersGenerator(object):
 
         self.t_max = 1000
 
-        self.alpha_list = np.arange(0.1, 1, 0.1)
+        self.alpha_list = np.arange(0.1, 1.1, 0.1)
 
         # Be careful in choosing of 'overflow' in exp computation
-        self.tau_list = np.arange(0.01, 0.1, 0.01)
-        self.epsilon_list = np.arange(0, 0.9, 1)
-        self.q_information_list = np.arange(0, 1, 0.1)
+        self.tau_list = np.arange(0.01, 0.11, 0.01)
+        self.epsilon_list = np.arange(0, 0.1, 0.1)
+        self.q_information_list = np.arange(0, 1.1, 0.1)
 
         self.n_cpu = 12
 
@@ -41,9 +41,29 @@ class ParametersGenerator(object):
             ]
         )
 
-        self.nb_sub_list = 100
+        self.nb_sub_list = 120
 
     def empty_scripts_folder(self):
+
+        if path.exists(self.folders["data"]):
+
+            response = input("Do you want to remove data folder?")
+
+            while response not in ['y', 'yes', 'n', 'no', 'Y', 'N']:
+                response = input("You can only respond by 'yes' or 'no'.")
+
+            print("Proceeding...")
+
+            if response in ['y', 'yes', 'Y']:
+
+                if path.exists(self.folders["data"]):
+                    shutil.rmtree(self.folders["data"])
+                print("Data folder has been erased.")
+            else:
+                print("Data folder has been conserved.")
+
+        else:
+            print("Proceeding...")
 
         print("Remove old scripts and logs...")
 
@@ -235,8 +255,6 @@ class ParametersGenerator(object):
             response = input("You can only respond by 'yes' or 'no'.")
 
         if response in ['y', 'yes', 'Y']:
-
-            print("Proceeding...")
 
             self.empty_scripts_folder()
             self.create_folders()

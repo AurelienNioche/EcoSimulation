@@ -131,7 +131,7 @@ class DataSaver(object):
 
 def main():
 
-    data_folder = "../single_shot_data"
+    data_folder = "../avakas-data"
     result_folder = "../results"
 
     data_saver = DataSaver(data_folder=data_folder, result_folder=result_folder)

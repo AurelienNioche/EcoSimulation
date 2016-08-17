@@ -15,7 +15,7 @@ class Analyst(object):
         self.n = len(self.db.read_column(column_name='ID'))
         self.parameters = self.db.get_column_list()
 
-        self.parameters_to_test = ['alpha', 'tau', 'area_move', 'area_vision']
+        self.parameters_to_test = ['alpha', 'tau', 'epsilon', 'q_information']
 
         print("Parameters:", self.parameters)
         print()
@@ -119,6 +119,9 @@ class Analyst(object):
 
     def plot_var_against_parameter(self, var, results, figure_folder):
 
+        if not path.exists(figure_folder):
+            mkdir(figure_folder)
+
         for parameter in results.keys():
 
             x = [i for i in results[parameter].keys()]
@@ -139,7 +142,7 @@ class Analyst(object):
 def main():
 
     result_folder = "../results"
-    figure_folder = "../global_analysis/figures"
+    figure_folder = "../global_analysis"
 
     a = Analyst(result_folder=result_folder)
     # a.compute_min_max()
