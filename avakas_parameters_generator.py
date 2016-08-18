@@ -22,7 +22,7 @@ class ParametersGenerator(object):
 
         # Be careful in choosing of 'overflow' in exp computation
         self.tau_list = np.arange(0.01, 0.11, 0.01)
-        self.epsilon_list = np.arange(0, 0.1, 0.1)
+        self.epsilon_list = np.arange(0., 1., 0.1)
         self.q_information_list = np.arange(0, 1.1, 0.1)
 
         self.n_cpu = 12
@@ -41,7 +41,7 @@ class ParametersGenerator(object):
             ]
         )
 
-        self.nb_sub_list = 120
+        self.nb_sub_list = 150
 
     def empty_scripts_folder(self):
 
@@ -90,7 +90,7 @@ class ParametersGenerator(object):
 
         workforce_step = 25
         workforce_mini = 50
-        workforce_maxi = 200
+        workforce_maxi = 100
 
         workforce[:] = workforce_mini
 
