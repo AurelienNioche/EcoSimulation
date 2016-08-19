@@ -3,6 +3,7 @@ from multiprocessing import Pool
 from module.data_importer import DataImporter
 from module.save_db_dic import BackUp
 from collections import OrderedDict
+from os import path
 
 
 # ------------------------------------------------||| MONEY TEST |||----------------------------------------------- #
@@ -131,8 +132,9 @@ class DataSaver(object):
 
 def main():
 
-    data_folder = "../avakas-data"
-    result_folder = "../results"
+    data_folder = "/Users/M-E4-ANIOCHE/Desktop/data"
+    assert path.exists(data_folder), "Wrong path to data..."
+    result_folder = "/Users/M-E4-ANIOCHE/Desktop/results"
 
     data_saver = DataSaver(data_folder=data_folder, result_folder=result_folder)
     data_saver.save_data()

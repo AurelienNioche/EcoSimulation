@@ -29,35 +29,11 @@ class Analyst(object):
         print("And under the hypothesis that a0 = a1 = a2?")
         print("*" * 10)
         print()
-        self.stats_about_economies_with_equal_fd()
+        # self.stats_about_economies_with_equal_fd()
         for i in self.parameters_to_test:
-            self.get_n_money_state_according_to_parameter_and_equal_fd(i)
+            self.get_n_money_state_according_to_parameter(i, supplementary_condition=" AND a0 = a1 AND a1 = a2")
 
-    def get_n_money_state_according_to_parameter(self, parameter):
-
-        assert parameter in self.parameters, 'You ask for a parameter that is not in the list...'
-
-        parameter_values = np.unique(self.db.read_column(column_name='{}'.format(parameter)))
-        print("Possible values for {}:".format(parameter), parameter_values)
-        print("Possible values for {}:".format(parameter), "min", np.min(parameter_values),
-              "max", np.max(parameter_values))
-
-        values_with_money = \
-            [i[0] for i in self.db.read(query="SELECT `{}` FROM `data` WHERE m_sum > 0".format(parameter))]
-        print("Values with money for {}:".format(parameter), "min", np.min(values_with_money),
-              "max", np.max(values_with_money))
-        print()
-
-    def stats_about_economies_with_equal_fd(self):
-
-        print("n sample:", self.n)
-        print("n with equal fundamental structure:",
-              len(self.db.read(query="SELECT `ID` FROM `data` WHERE a0 = a1 AND a1 = a2")))
-        print("n with equal fundamental structure and more than one moneraty state:",
-              len(self.db.read(query="SELECT `ID` FROM `data` WHERE m_sum > 0 AND a0 = a1 AND a1 = a2")))
-        print()
-
-    def get_n_money_state_according_to_parameter_and_equal_fd(self, parameter):
+    def get_n_money_state_according_to_parameter(self, parameter, supplementary_condition=""):
 
         assert parameter in self.parameters, 'You ask for a parameter that is not in the list...'
 
@@ -67,13 +43,39 @@ class Analyst(object):
               "max", np.max(parameter_values))
 
         values_with_money = \
-            [i[0] for i in self.db.read
-             (query="SELECT `{}` FROM `data` WHERE m_sum > 0 AND a0 = a1 AND a1 = a2".format(parameter))]
+            [i[0] for i in self.db.read(query="SELECT `{}` FROM `data` WHERE m_sum > 0{}"
+                                        .format(parameter, supplementary_condition))]
+
         print("Values with money for {}:".format(parameter), "min", np.min(values_with_money),
               "max", np.max(values_with_money))
         print()
 
-    def represent_var_according_to_parameter(self, var):
+    # def stats_about_economies_with_equal_fd(self):
+    #
+    #     print("n sample:", self.n)
+    #     print("n with equal fundamental structure:",
+    #           len(self.db.read(query="SELECT `ID` FROM `data` WHERE a0 = a1 AND a1 = a2")))
+    #     print("n with equal fundamental structure and more than one moneraty state:",
+    #           len(self.db.read(query="SELECT `ID` FROM `data` WHERE m_sum > 0 AND a0 = a1 AND a1 = a2")))
+    #     print()
+
+    # def get_n_money_state_according_to_parameter_and_equal_fd(self, parameter):
+    #
+    #     assert parameter in self.parameters, 'You ask for a parameter that is not in the list...'
+    #
+    #     parameter_values = np.unique(self.db.read_column(column_name='{}'.format(parameter)))
+    #     print("Possible values for {}:".format(parameter), parameter_values)
+    #     print("Possible values for {}:".format(parameter), "min", np.min(parameter_values),
+    #           "max", np.max(parameter_values))
+    #
+    #     values_with_money = \
+    #         [i[0] for i in self.db.read
+    #          (query="SELECT `{}` FROM `data` WHERE m_sum > 0 AND a0 = a1 AND a1 = a2".format(parameter))]
+    #     print("Values with money for {}:".format(parameter), "min", np.min(values_with_money),
+    #           "max", np.max(values_with_money))
+    #     print()
+
+    def represent_var_according_to_parameter(self, var, supplementary_condition=""):
 
         assert var in self.parameters, ""
 
@@ -92,7 +94,8 @@ class Analyst(object):
 
                 m_sum = \
                     [i[0] for i in self.db.read
-                     (query="SELECT `{}` FROM `data` WHERE {} = {}".format(var, parameter, v))]
+                     (query="SELECT `{}` FROM `data` WHERE {} = {}{}".format(var, parameter, v,
+                                                                             supplementary_condition))]
                 average_m_sum[v] = np.mean(m_sum)
 
             print("Average '{}' for {}".format(var, parameter), average_m_sum)
@@ -103,15 +106,15 @@ class Analyst(object):
 
         return results
 
-    def select_best_economy(self):
-
-        m_sum = \
-            [i[0] for i in self.db.read
-             (query="SELECT `m_sum` FROM `data`")]
-        max_m_sum = np.max(m_sum)
-
-        idx_max_m_sum = self.db.read(query="SELECT `idx` FROM `data` WHERE `m_sum` = {}".format(max_m_sum))[0][0]
-        print("Economy idx with the greatest number of monetary state:", idx_max_m_sum)
+    # def select_best_economy(self):
+    #
+    #     m_sum = \
+    #         [i[0] for i in self.db.read
+    #          (query="SELECT `m_sum` FROM `data`")]
+    #     max_m_sum = np.max(m_sum)
+    #
+    #     idx_max_m_sum = self.db.read(query="SELECT `idx` FROM `data` WHERE `m_sum` = {}".format(max_m_sum))[0][0]
+    #     print("Economy idx with the greatest number of monetary state:", idx_max_m_sum)
 
         # economy_suffix = "{}_idx{}".format(self.session_suffix, idx_max_m_sum)
         #
@@ -141,12 +144,13 @@ class Analyst(object):
 
 def main():
 
-    result_folder = "../results"
-    figure_folder = "../global_analysis"
+    result_folder = "/Users/M-E4-ANIOCHE/Desktop/results"
+    assert path.exists(result_folder), "Wrong path to result folder..."
+    figure_folder = "/Users/M-E4-ANIOCHE/Desktop/analysis"
 
     a = Analyst(result_folder=result_folder)
     # a.compute_min_max()
-    results = a.represent_var_according_to_parameter('m_sum')
+    results = a.represent_var_according_to_parameter('m_sum', supplementary_condition=" AND a0 = a1 AND a1 = a2")
     a.plot_var_against_parameter('m_sum', results, figure_folder)
     # a.represent_var_according_to_parameter('interruptions')
     # a.select_best_economy()
