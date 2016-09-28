@@ -14,6 +14,8 @@ class AvakasLauncher(object):
             "job_names": ".."
         }
 
+        self.job_names = []
+
     def load_scripts(self):
 
         mypath = self.folder["script"]
@@ -22,15 +24,13 @@ class AvakasLauncher(object):
 
         return script_names
 
-    def save_job_names(self, job_names):
+    def save_job_names(self):
 
         with open('{}/job_names.json'.format(self.folder["job_names"]), 'w') as f:
 
-            json.dump(job_names, f, indent=4)
+            json.dump(self.job_names, f, indent=4)
 
     def launch_jobs(self, script_names):
-
-        job_names = []
 
         for script_name in script_names:
 
@@ -42,16 +42,17 @@ class AvakasLauncher(object):
 
             print()
 
-            job_names.append(str(output).split(".")[0])  # Keep just the number of the job as ID
-
-        return job_names
+            self.job_names.append(str(output).split(".")[0])  # Keep just the number of the job as ID
 
     def run(self):
 
         script_names = self.load_scripts()
         assert len(script_names) > 0, "Can't find any script to launch."
-        job_names = self.launch_jobs(script_names)
-        self.save_job_names(job_names)
+
+        try:
+            self.launch_jobs(script_names)
+        except KeyboardInterrupt:
+            self.save_job_names()
 
 
 def main():
