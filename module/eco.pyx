@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 cimport numpy as cnp
 from tqdm import tqdm
 
@@ -53,7 +54,7 @@ cdef class Economy(object):
             estimation_kj, estimation_ki, money_round, money_time, \
             beginning_reward, end_reward, idx0, idx1, idx2, idx3, idx4, idx5, choice_transition
         public int q_information, n
-        public double alpha, temperature, epsilon
+        public double alpha, temperature, gamma
         public cnp.ndarray workforce, total_received_information, \
             received_information, i_choice, finding_a_partner,
 
@@ -61,23 +62,25 @@ cdef class Economy(object):
 
         # ------------- #
         # Parameters
+
+        # np.random.seed(parameters["seed"])
         # ------------ #
 
-        self.n = np.sum(parameters["workforce"])  # Total number of agents
+        self.n = np.sum(parameters["x0"] + parameters["x1"] + parameters["x2"])  # Total number of agents
         self.workforce = np.zeros(3, dtype=int)
-        self.workforce[:] = parameters["workforce"]  # Number of agents by type
+        self.workforce[:] = parameters["x0"], parameters["x1"], parameters["x2"]  # Number of agents by type
 
         self.t_max = parameters["t_max"]
 
         self.alpha = parameters["alpha"]  # Learning coefficient
         self.temperature = parameters["tau"]  # Softmax parameter
 
-        self.q_information = int(np.round(parameters["q_information"]*self.n))
+        self.q_information = int(np.round(parameters["q"]*self.n))
 
         if self.q_information == self.n:
             self.q_information -= 1
 
-        self.epsilon = parameters["epsilon"]  # Parameter for the weight of own information
+        self.gamma = parameters["gamma"]  # Parameter for the weight of own information
         # against information provided by others
 
         # --------- #
@@ -163,8 +166,8 @@ cdef class Economy(object):
         # '1' means each type of exchange can be expected to be realized in only one unit of time
         # The more the value is close to zero, the more an exchange is expected to be hard.
 
-        self.received_information = np.zeros((self.n, 4))
-        self.total_received_information = np.zeros(self.n, dtype=int)
+        # self.received_information = np.zeros((self.n, 4))
+        # self.total_received_information = np.zeros(self.n, dtype=int)
 
     cpdef setup(self):
 
@@ -250,10 +253,6 @@ cdef class Economy(object):
         # assert np.min(self.value_kj)>=0
         # assert np.min(self.value_ki)>=0
 
-        # b = time()
-        # self.dico['update_options_values'][0] += (b-a)
-        # self.dico['update_options_values'][1] += 1
-
     cdef make_a_choice(self):
 
         # a = time()
@@ -274,9 +273,7 @@ cdef class Economy(object):
         # (As there is only 2 options each time, computing probability for a unique option is sufficient)
 
         self.probability_of_choosing_option0[:] = \
-            np.exp(self.value_option0/self.temperature) / \
-            (np.exp(self.value_option0/self.temperature) +
-             np.exp(self.value_option1/self.temperature))
+            1 / (1 + np.exp(-(self.value_option0 - self.value_option1)/self.temperature))
 
         self.random_number[:] = np.random.uniform(0., 1., self.n)  # Generate random numbers
 
@@ -286,24 +283,12 @@ cdef class Economy(object):
         self.choice[:] = self.random_number >= self.probability_of_choosing_option0
         self.i_choice[:] = (self.decision * 2) + self.choice
 
-        # b = time()
-        # self.dico['make_a_choice'][0] += (b-a)
-        # self.dico['make_a_choice'][1] += 1
-
     cdef who_is_where(self):
-
-        # a = time()
 
         # Place the agents according to their type, decision and choice
         self.place[:] = self.placement[self.type, self.decision, self.choice]
 
-        # b= time()
-        # self.dico['who_is_where'][0] += (b-a)
-        # self.dico['who_is_where'][1] += 1
-
     cdef make_the_transactions(self):
-
-        # a = time()
 
         cdef:
             cnp.ndarray ipp0, ipp1, ipp2, ipp3, ipp4, ipp5, ip0, ip1
@@ -343,10 +328,6 @@ cdef class Economy(object):
                 np.random.shuffle(ip0)
                 self.finding_a_partner[ip0[:len(ip1)]] = 1
 
-        # b = time()
-        # self.dico['make_the_transactions'][0] += (b-a)
-        # self.dico['make_the_transactions'][1] += 1
-
 
 ############################################################
 #            INFORMATION                                   #
@@ -374,9 +355,6 @@ cdef class Economy(object):
                 informers_choices=informers_choices,
                 informers_results=informers_results)
 
-            # save this for future analysis
-            self.received_information[i, :] = informers_averages
-
             estimations = \
                 np.array([self.estimation_ij[i], self.estimation_ik[i], self.estimation_kj[i], self.estimation_ki[i]])
 
@@ -387,10 +365,6 @@ cdef class Economy(object):
             self.estimation_ik[i] = new_estimations[1]
             self.estimation_kj[i] = new_estimations[2]
             self.estimation_ki[i] = new_estimations[3]
-
-        # b = time()
-        # self.dico['update_estimations'][0] += (b-a)
-        # self.dico['update_estimations'][1] += 1
 
     cdef tuple info_select_informers(self, int i):
 
@@ -430,9 +404,6 @@ cdef class Economy(object):
 
         relative_choices = self.info_choice_transition_function(relative_type, informers_choices)
 
-        # Save number of useful informers
-        self.total_received_information[i] += np.sum(relative_choices[:] != -1)
-
         return relative_choices, informers_results
 
     cdef cnp.ndarray info_compute_information(self, int i, cnp.ndarray informers_choices,
@@ -450,11 +421,11 @@ cdef class Economy(object):
 
             bool_exchange = informers_choices[:] == exchange_type
 
-            if np.sum(bool_exchange) > 0.:
+            if np.sum(bool_exchange) > 0:
 
                 averages[exchange_type] = np.mean(informers_results[bool_exchange])
             else:
-                averages[exchange_type] = -1.
+                averages[exchange_type] = np.nan
 
         return averages
 
@@ -470,25 +441,20 @@ cdef class Economy(object):
         # Here, we have computed the right type of transactions from the point of view of agent i compared with
         # the type of choices which are made by the other agents. Then, once we have identified what agents
         # contributes to the 4 different estimations for i, we give their results corresponding to their
-        # previous transaction according to the fact they succeeded in their transaction or not.
+        # previous transaction according to the fact that they succeeded in their transaction or not.
 
         my_opinion = np.zeros(4)
-        my_opinion[i_choice] = self.epsilon * (self.finding_a_partner[i] - estimations[i_choice])
+        my_opinion[i_choice] = self.gamma * (self.finding_a_partner[i] - estimations[i_choice])
 
         for exchange_type in range(4):
 
-            if informers_averages[exchange_type] != -1.:  # Exclude this value ; assume others_opinion[k] is null
+            if not np.isnan(informers_averages[exchange_type]):  # Exclude this value ; assume others_opinion[k] is null
 
                 others_opinion = \
-                    (1 - self.epsilon) * (informers_averages[exchange_type] - estimations[exchange_type])
+                    (1 - self.gamma) * (informers_averages[exchange_type] - estimations[exchange_type])
 
             else:
-
                 others_opinion = 0
-
-            estimations[exchange_type] += self.alpha * (my_opinion[exchange_type] + others_opinion)
-
-        for exchange_type in range(4):
 
             estimations[exchange_type] += self.alpha * (my_opinion[exchange_type] + others_opinion)
 
@@ -544,7 +510,6 @@ cdef class SimulationRunner(object):
                 self.eco.run()
                 self.make_some_stats()
                 self.t += 1
-
 
         return self.export()
 

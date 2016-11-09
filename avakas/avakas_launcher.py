@@ -3,30 +3,27 @@ import json
 import sys
 from os import listdir
 from os.path import isfile, join
+from module.folders import Folders
 
 
 class AvakasLauncher(object):
 
     def __init__(self):
 
-        self.folder = {
-            "script": "../avakas_scripts",
-            "job_names": ".."
-        }
-
         self.job_names = []
 
-    def load_scripts(self):
+    @staticmethod
+    def load_scripts():
 
-        mypath = self.folder["script"]
-        onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-        script_names = [f for f in onlyfiles if f[-3:] == ".sh"]
+        my_path = Folders.scripts
+        only_files = [f for f in listdir(my_path) if isfile(join(my_path, f))]
+        script_names = [f for f in only_files if f[-3:] == ".sh"]
 
         return script_names
 
     def save_job_names(self):
 
-        with open('{}/job_names.json'.format(self.folder["job_names"]), 'w') as f:
+        with open('{}/job_names.json'.format(Folders.job_names), 'w') as f:
 
             json.dump(self.job_names, f, indent=4)
 
@@ -36,7 +33,7 @@ class AvakasLauncher(object):
 
             print("Launch script '{}'...".format(script_name))
 
-            output = subprocess.check_output("qsub {}/{}".format(self.folder["script"], script_name).split())
+            output = subprocess.check_output("qsub {}/{}".format(Folders.scripts, script_name).split())
 
             print("System answers '{}'.".format(str(output)[:-1]))  # [:-1] is for removing the \n at the end
 
