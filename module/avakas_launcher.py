@@ -1,7 +1,7 @@
 import subprocess
 import json
 import sys
-from os import listdir
+from os import listdir, chdir
 from os.path import isfile, join
 from module.folders import Folders
 
