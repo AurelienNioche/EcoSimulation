@@ -1,9 +1,9 @@
 import subprocess
 import json
 import sys
-from os import listdir, chdir
+from os import listdir
 from os.path import isfile, join
-from module.folders import Folders
+from folders import Folders  # Error in Python3 but good in Python2
 
 
 class AvakasLauncher(object):
