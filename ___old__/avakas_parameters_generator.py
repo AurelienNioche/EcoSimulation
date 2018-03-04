@@ -5,7 +5,7 @@ from os import path, mkdir
 import shutil
 import re
 from random import shuffle
-from module.folders import Folders
+from ___old__.module import Folders
 
 
 class ParametersGenerator(object):

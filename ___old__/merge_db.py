@@ -4,7 +4,7 @@ from collections import OrderedDict
 from datetime import date
 from multiprocessing import Process, SimpleQueue, Event, Value
 from sqlite3 import connect, OperationalError
-from module.folders import Folders
+from ___old__.module import Folders
 
 
 class Database(object):

@@ -1,13 +1,13 @@
 import numpy as np
 from datetime import date
 from os import system
-from module.save_eco import BackUp
+from ___old__.module.save_eco import BackUp
 
 
 def main():
 
     system("python3 setup.py build_ext --inplace")
-    from module.eco import Launcher
+    from ___old__.module import Launcher
 
     parameters = {
         "x0": 500,  # np.random.randint(500),
