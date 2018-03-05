@@ -1,0 +1,14 @@
+{
+  "x":[50, 75, 100],
+  "gamma_min": 0,
+  "gamma_max": 1,
+  "q_min": 0,
+  "q_max": 1,
+  "alpha_min": 0.2,
+  "alpha_max": 0.5,
+  "tau_min": 0.01,
+  "tau_max": 0.09,
+  "t_max": 500,
+  "seed": 0,
+  "n": 100
+}

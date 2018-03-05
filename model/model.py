@@ -43,12 +43,12 @@ import numpy as np
 
 class Economy:
 
-    def __init__(self, x0, x1, x2, t_max, alpha, tau, q, gamma):
+    def __init__(self, x0, x1, x2, t_max, alpha, tau, q, gamma, seed):
 
         # ------------- #
         # Parameters
 
-        # np.random.seed(parameters["seed"])
+        np.random.seed(seed)
         # ------------ #
 
         self.n = x0 + x1 + x2  # Total number of agents
@@ -311,7 +311,6 @@ class Economy:
 ############################################################
 #            INFORMATION                                   #
 ############################################################
-
 
     def info_choice_transition_function(self, x, y):
 
